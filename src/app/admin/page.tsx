@@ -59,7 +59,7 @@ export default function AdminLogin() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <div className="rounded-md shadow-sm space-y-4">
+          <div className="rounded-md space-y-4">
             <div>
               <Label htmlFor="email">Email address</Label>
               <Input

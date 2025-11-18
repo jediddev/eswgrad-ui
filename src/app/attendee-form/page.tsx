@@ -21,6 +21,8 @@ export default function AttendeeForm() {
     const [section, setSection] = React.useState<string>("A");
     const [submitted, setSubmitted] = React.useState<boolean>(false);
     const [hasFilled, setHasFilled] = React.useState<boolean>(false);
+    const [formError, setFormError] = React.useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
 
     React.useEffect(() => {
         // Check localStorage on client-side only
@@ -34,14 +36,30 @@ export default function AttendeeForm() {
 
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        setFormError(null);
+        setIsSubmitting(true);
+
         const formData = new FormData(e.currentTarget);
-        const name = formData.get("name");
-        const email = formData.get("email");
-        const password = formData.get("password");
-        const gender = formData.get("gender");
-        const phone = formData.get("phone");
-        const address = formData.get("address");
+        const name = formData.get("name") as string;
+        const email = formData.get("email") as string;
+        const password = formData.get("password") as string;
+        const gender = formData.get("gender") as string;
+        const phone = formData.get("phone") as string;
+        const address = formData.get("address") as string;
         const photo = formData.get("photo") as File | null;
+
+        // Validate required fields
+        if (!name || !email || !password || !gender || !phone || !address || !section) {
+            setFormError("All fields are required");
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (!dob) {
+            setFormError("Please select your date of birth");
+            setIsSubmitting(false);
+            return;
+        }
         if (!photo) {
             setPhotoError("Photo is required.");
             return;
@@ -58,41 +76,56 @@ export default function AttendeeForm() {
             dataURI = `data:${photo.type};base64,${base64}`;
         }
 
-        const response = await fetch("https://eswgrad.onrender.com/api/students/create", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                name,
-                email,
-                password,
-                dob,
-                gender,
-                phone,
-                address,
-                photo: dataURI,
-                section,
-                role: role || "attendee",
-            }),
-        });
+        try {
+            const response = await fetch("https://eswgrad.onrender.com/api/students/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    dob,
+                    gender,
+                    phone,
+                    address,
+                    photo: dataURI,
+                    section,
+                    role: role || "attendee",
+                }),
+            });
 
-        if (!response.ok) {
-            let message = "Network response was not ok";
-            try {
-                const err = await response.json();
-                if (err?.message) message = err.message;
-            } catch {}
-            console.log(response);
-            throw new Error(message);
-        }
+            if (!response.ok) {
+                let message = "Network response was not ok";
+                try {
+                    const err = await response.json();
+                    if (err?.message) message = err.message;
+                } catch {}
+                console.log(response);
+                throw new Error(message);
+            }
 
-        const data = await response.json();
-        if (typeof window !== "undefined") {
-            localStorage.setItem("filled", "true");
+            const data = await response.json();
+            if (typeof window !== "undefined") {
+                localStorage.setItem("filled", "true");
+            }
+            setSubmitted(true);
+            console.log(data);
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            setFormError(error instanceof Error ? error.message : "Failed to submit form. Please try again.");
+        } finally {
+            setIsSubmitting(false);
         }
-        setSubmitted(true);
-        console.log(data);
+    }
+
+    if (isSubmitting) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen">
+                <h1 className="text-2xl font-bold">Submitting form...</h1>
+            </div>
+        );
     }
 
     if (submitted) {
@@ -283,8 +316,9 @@ export default function AttendeeForm() {
                             className="mt-2 mx-auto h-24 w-24 rounded-full object-cover border"
                         />
                     )}
-                    <Button className="w-full mt-4 bg-esecondary" type="submit">
-                        Register
+                    {formError && <div className="text-red-600 text-sm mt-2 p-2 bg-red-50 rounded">{formError}</div>}
+                    <Button className="w-full mt-4 bg-esecondary" type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? "Registering..." : "Register"}
                     </Button>
                 </div>
             </form>
