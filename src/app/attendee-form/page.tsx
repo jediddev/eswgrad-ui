@@ -117,7 +117,7 @@ export default function AttendeeForm() {
                 <h1 className="text-3xl font-bold text-white">Attendee Form</h1>
                 <p className="text-md mt-1 text-white/50">Fill out the form below to register for grad.</p>
             </div>
-            <Alert className="bg-black/10">
+            <Alert className="bg-black/10 max-w-xl rounded-t-none mx-auto">
                 <AlertTitle>Please Note</AlertTitle>
                 <AlertDescription>You can fill out this form only once.</AlertDescription>
             </Alert>
