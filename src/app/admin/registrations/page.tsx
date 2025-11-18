@@ -20,15 +20,38 @@ export default function Registrations() {
     const [registrations, setRegistrations] = useState<Registration[]>([]);
     const [isAuth, setIsAuth] = useState(false);
 
-    useEffect(() => {
-        const fetchRegistrations = async () => {
-            const response = await fetch("https://eswgrad.onrender.com/api/students/get-all");
+useEffect(() => {
+    const fetchRegistrations = async () => {
+        try {
+            const token = localStorage.getItem("adminToken");
+            const response = await fetch("https://eswgrad.onrender.com/api/students/get-all", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to fetch registrations');
+            }
+            
             const data = await response.json();
-            console.log(data)
-            setRegistrations(data.student);
-        };
-        fetchRegistrations();
-    }, []);
+            console.log("API Response:", data);
+            
+            // Check if data.students exists and is an array
+            if (data.success && Array.isArray(data.students)) {
+                setRegistrations(data.students);
+            } else {
+                console.error("Unexpected API response format:", data);
+                setRegistrations([]);
+            }
+        } catch (error) {
+            console.error("Error fetching registrations:", error);
+            setRegistrations([]);
+        }
+    };
+    
+    fetchRegistrations();
+}, []);
 
     useEffect(() => {
         const token = localStorage.getItem("adminToken");
