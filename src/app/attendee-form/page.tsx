@@ -263,9 +263,9 @@ export default function AttendeeForm() {
                                 return;
                             }
                             const isValidType = ["image/jpeg", "image/png"].includes(file.type);
-                            const isValidSize = file.size <= 1024 * 1024; // 1MB
+                            const isValidSize = file.size <= 5 * 1024 * 1024; // 1MB
                             if (!isValidType || !isValidSize) {
-                                setPhotoError("Only JPG/PNG up to 1MB are allowed.");
+                                setPhotoError("Only JPG/PNG up to 5MB are allowed.");
                                 e.currentTarget.value = "";
                                 setPhotoPreview("");
                                 return;
