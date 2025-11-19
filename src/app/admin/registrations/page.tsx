@@ -84,7 +84,8 @@ export default function Registrations() {
     return (
         <div>
             <div className="bg-black text-white flex flex-col items-center min-h-screen">
-                <h1 className="text-2xl font-semibold mt-8 mb-6 text-white">Grad Registrations</h1>
+                <h1 className="text-2xl font-semibold mt-8 mb-2 text-white">Grad Registrations</h1>
+                <p className="mb-4 opacity-50">{registrations.length} registrations</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-0 mt-4">
                     {registrations.map((registration) => (
                         <div className="flex flex-col p-6 border border-white/10" key={registration._id}>

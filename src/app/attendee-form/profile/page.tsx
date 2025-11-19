@@ -89,7 +89,7 @@ export default function ProfilePictureUpdate() {
 
             // Call the update API
             const response = await fetch(
-                `http://localhost:5000/api/students/update?email=${encodeURIComponent(email)}`,
+                `https://eswgrad.onrender.com/api/students/update?email=${encodeURIComponent(email)}`,
                 {
                     method: "PUT",
                     headers: {
