@@ -22,7 +22,7 @@ export default function Registrations() {
         const fetchRegistrations = async () => {
             try {
                 const token = localStorage.getItem("adminToken");
-                const response = await fetch("http://localhost:5000/api/students/get-all", {
+                const response = await fetch("https://eswgrad.onrender.com/api/students/get-all", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
