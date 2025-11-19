@@ -60,16 +60,49 @@ export default function AttendeeForm() {
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setFormError(null);
+        setPhotoError("");
         setIsSubmitting(true);
 
         const formData = new FormData(e.currentTarget);
-        const name = formData.get("name") as string;
-        const email = formData.get("email") as string;
-        const password = formData.get("password") as string;
-        const gender = formData.get("gender") as string;
-        const phone = formData.get("phone") as string;
-        const address = formData.get("address") as string;
+        const name = (formData.get("name") as string)?.trim();
+        const email = (formData.get("email") as string)?.trim();
+        const password = (formData.get("password") as string)?.trim();
+        const gender = (formData.get("gender") as string)?.trim();
+        const phone = (formData.get("phone") as string)?.trim();
+        const address = (formData.get("address") as string)?.trim();
+        const section = (formData.get("section") as string)?.trim();
         const photo = formData.get("photo") as File | null;
+
+        // Validate all required fields
+        const missingFields: string[] = [];
+        if (!name) missingFields.push("Name");
+        if (!email) missingFields.push("Email");
+        if (!password) missingFields.push("Passcode");
+        if (!gender) missingFields.push("Gender");
+        if (!phone) missingFields.push("Phone Number");
+        if (!address) missingFields.push("Address");
+        if (!section) missingFields.push("Section");
+        if (!dob) missingFields.push("Date of Birth");
+        if (!photo) missingFields.push("Photo");
+
+        if (missingFields.length > 0) {
+            setFormError(`Please fill in all required fields: ${missingFields.join(", ")}`);
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Additional validation
+        if (password.length !== 6 || !/^\d+$/.test(password)) {
+            setFormError("Passcode must be exactly 6 digits");
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (!/^\d{10}$/.test(phone)) {
+            setFormError("Phone number must be 10 digits");
+            setIsSubmitting(false);
+            return;
+        }
 
         // Validate required fields
         if (!name || !email || !password || !gender || !phone || !address || !section) {
