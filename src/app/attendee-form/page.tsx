@@ -34,6 +34,29 @@ export default function AttendeeForm() {
         };
     }, [photoPreview]);
 
+    // Convert a File to a data URL using FileReader for reliability across browsers
+    function fileToDataURL(file: File): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const result = reader.result as string;
+                resolve(result);
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function inferImageMimeFromName(name: string): string | null {
+        const ext = name.split(".").pop()?.toLowerCase();
+        if (!ext) return null;
+        if (ext === "jpg" || ext === "jpeg") return "image/jpeg";
+        if (ext === "png") return "image/png";
+        if (ext === "gif") return "image/gif";
+        if (ext === "webp") return "image/webp";
+        return null;
+    }
+
     async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setFormError(null);
@@ -62,18 +85,23 @@ export default function AttendeeForm() {
         }
         if (!photo) {
             setPhotoError("Photo is required.");
+            setIsSubmitting(false);
             return;
         }
-        let dataURI = "";
-        if (photo) {
-            const arrayBuffer = await photo.arrayBuffer();
-            const bytes = new Uint8Array(arrayBuffer);
-            let binary = "";
-            for (let i = 0; i < bytes.length; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            const base64 = btoa(binary);
-            dataURI = `data:${photo.type};base64,${base64}`;
+        // Build a robust data URL for the selected image
+        let dataURI = await fileToDataURL(photo);
+        // Some environments set an empty or generic mimetype resulting in application/octet-stream
+        // If that happens, try to replace with a better inferred type from the filename
+        if (dataURI.startsWith("data:application/octet-stream;base64,")) {
+            const inferred = inferImageMimeFromName(photo.name) || photo.type || "image/jpeg";
+            dataURI = dataURI.replace("data:application/octet-stream", `data:${inferred}`);
+        }
+        // Ensure there is base64 content after the comma
+        const commaIndex = dataURI.indexOf(",");
+        if (commaIndex === -1 || !dataURI.substring(commaIndex + 1)) {
+            setFormError("Selected photo could not be read. Please try a different image.");
+            setIsSubmitting(false);
+            return;
         }
 
         try {
