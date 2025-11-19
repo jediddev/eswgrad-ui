@@ -17,9 +17,11 @@ interface Registration {
 export default function Registrations() {
     const [registrations, setRegistrations] = useState<Registration[]>([]);
     const [isAuth, setIsAuth] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchRegistrations = async () => {
+            setIsLoading(true);
             try {
                 const token = localStorage.getItem("adminToken");
                 const response = await fetch("https://eswgrad.onrender.com/api/students/get-all", {
@@ -45,6 +47,8 @@ export default function Registrations() {
             } catch (error) {
                 console.error("Error fetching registrations:", error);
                 setRegistrations([]);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -58,6 +62,17 @@ export default function Registrations() {
         }
     }, []);
 
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-black text-white">
+                <div className="flex flex-col items-center">
+                    <div className="h-10 w-10 rounded-full border-4 border-white/20 border-t-white animate-spin mb-4" />
+                    <p className="text-sm opacity-80">Loading registrations...</p>
+                </div>
+            </div>
+        );
+    }
+
     if (!isAuth) {
         return (
             <div className="flex flex-col items-center min-h-screen">
@@ -69,7 +84,7 @@ export default function Registrations() {
     return (
         <div>
             <div className="bg-black text-white flex flex-col items-center min-h-screen">
-                <h1 className="text-2xl font-bold mt-8 mb-6 text-white">Registrations</h1>
+                <h1 className="text-2xl font-semibold mt-8 mb-6 text-white">Grad Registrations</h1>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-0 mt-4">
                     {registrations.map((registration) => (
                         <div className="flex flex-col p-6 border border-white/10" key={registration._id}>
